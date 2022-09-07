@@ -1,7 +1,7 @@
 version: '3.7'
 
 networks:
-  elk:
+  lucynet:
     driver: bridge
 
 volumes:
@@ -12,20 +12,29 @@ volumes:
 
 services:
 
+  # lucy config server
+  lucyconfigserver:
+    build:
+      context: config-server/
+      args:
+        CONFIG_USER: ${CONFIG_USER:-}
+        CONFIG_PASS: ${CONFIG_PASS:-}
+        CONFIG_GIT_REPO: ${CONFIG_GIT_REPO:-}
+    ports:
+      - 8888:8888
+    networks:
+      - lucynet
+
   # lucy-core
   lucycore:
     build:
       context: core/
       args:
-        LOGSTASH_PATH: localhost
+        LOGSTASH_PATH: logstash:50000
     ports:
       - 8080:8080
-    environment:
-      LOGSTASH_PATH: localhost
     networks:
-      - elk
-    depends_on:
-      - logstash
+      - lucynet
 
   # This task is only performed during the *initial* startup of the stack. On all
   # subsequent runs, the service simply returns immediately, without performing
@@ -43,7 +52,7 @@ services:
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
-      - elk
+      - lucynet
     depends_on:
       - elasticsearch
 
@@ -69,7 +78,7 @@ services:
       # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
     networks:
-      - elk
+      - lucynet
 
   logstash:
     build:
@@ -88,7 +97,7 @@ services:
       LS_JAVA_OPTS: -Xms256m -Xmx256m
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
     networks:
-      - elk
+      - lucynet
     depends_on:
       - elasticsearch
 
@@ -104,6 +113,6 @@ services:
     environment:
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
-      - elk
+      - lucynet
     depends_on:
       - elasticsearch

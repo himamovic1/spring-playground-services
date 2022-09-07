@@ -15,7 +15,7 @@
 
     <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <param name="Encoding" value="UTF-8"/>
-        <destination>logstash:50000</destination>
+        <destination>${LOGSTASH_DESTINATION}</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"app_name":"lucy-core"}</customFields>
         </encoder>
