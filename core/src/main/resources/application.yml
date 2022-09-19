@@ -1,0 +1,23 @@
+# Use random port
+server:
+  port: 0
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: core
+  cloud:
+    config:
+      enabled: false
+
+# Eureka config properties
+eureka:
+  client:
+    enabled: true
+    registerWithEureka: true
+    registryFetchIntervalSeconds: 10
+    serviceUrl:
+      defaultZone: ${EUREKA_URI}
+  instance:
+    preferIpAddress: true

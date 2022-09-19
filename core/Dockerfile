@@ -1,10 +1,7 @@
 FROM amazoncorretto:17.0.4-alpine AS base_stage
-EXPOSE 8080
 
 FROM gradle:7.5-jdk17-alpine as build_stage
-ARG LOGSTASH_PATH
 
-ENV LOGSTASH_DESTINATION $LOGSTASH_PATH
 ENV APP_HOME /usr/app
 WORKDIR $APP_HOME
 
@@ -15,9 +12,7 @@ COPY ./build.gradle ./settings.gradle $APP_HOME/
 RUN gradle build --no-daemon
 
 FROM base_stage AS final_stage
-ARG LOGSTASH_PATH
 
-ENV LOGSTASH_DESTINATION $LOGSTASH_PATH
 ENV ARTIFACT_NAME core-0.0.1-SNAPSHOT.jar
 ENV APP_HOME /usr/app
 WORKDIR $APP_HOME

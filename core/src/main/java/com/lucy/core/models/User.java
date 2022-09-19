@@ -15,6 +15,9 @@ public class User {
     private UUID id;
 
     @NotNull
+    private String role;
+
+    @NotNull
     @Size(min = 1, max = 25)
     private String name;
 

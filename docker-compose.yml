@@ -38,14 +38,16 @@ services:
       context: core/
     depends_on:
       - lucyconfigserver
+      - lucyserviceregistry
       - logstash
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      EUREKA_URI: ${EUREKA_URI:-}
+      LOGSTASH_URI: ${LOGSTASH_URI:-}
       # SPRING_CONFIG_IMPORT: "configserver:http://lucyconfigserver:8888"
       # SPRING_CLOUD_CONFIG_URI: http://lucyconfigserver:8888
-      SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
-      SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
-      LOGSTASH_DESTINATION: logstash:50000
+      # SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
+      # SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
     ports:
       - 8080:8080
     networks:
