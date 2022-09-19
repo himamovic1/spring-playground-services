@@ -2,7 +2,6 @@ version: '3.7'
 
 networks:
   lucynet:
-    driver: bridge
 
 volumes:
   setup:
@@ -11,6 +10,14 @@ volumes:
     driver: local
 
 services:
+
+  lucyserviceregistry:
+    build:
+      context: service-registry/
+    ports:
+      - 8761:8761
+    networks:
+      - lucynet
 
   # lucy config server
   lucyconfigserver:
@@ -29,8 +36,16 @@ services:
   lucycore:
     build:
       context: core/
-      args:
-        LOGSTASH_PATH: logstash:50000
+    depends_on:
+      - lucyconfigserver
+      - logstash
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # SPRING_CONFIG_IMPORT: "configserver:http://lucyconfigserver:8888"
+      # SPRING_CLOUD_CONFIG_URI: http://lucyconfigserver:8888
+      SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
+      SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
+      LOGSTASH_DESTINATION: logstash:50000
     ports:
       - 8080:8080
     networks:
