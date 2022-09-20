@@ -20,6 +20,10 @@ services:
         CONFIG_USER: ${CONFIG_USER:-}
         CONFIG_PASS: ${CONFIG_PASS:-}
         CONFIG_GIT_REPO: ${CONFIG_GIT_REPO:-}
+    environment:
+      SPRING_SECURITY_USER_NAME: ${CONFIG_USER:-}
+      SPRING_SECURITY_USER_PASSWORD: ${CONFIG_PASS:-}
+      SPRING_CLOUD_CONFIG_SERVER_GIT_URI: ${CONFIG_GIT_REPO:-}
     ports:
       - 8888:8888
     networks:
@@ -38,18 +42,19 @@ services:
   lucycore:
     build:
       context: core/
+    restart: on-failure
     depends_on:
       - lucyconfigserver
       - lucyserviceregistry
       - logstash
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       EUREKA_URI: ${EUREKA_URI:-}
       LOGSTASH_URI: ${LOGSTASH_URI:-}
-      # SPRING_CONFIG_IMPORT: "configserver:http://lucyconfigserver:8888"
-      # SPRING_CLOUD_CONFIG_URI: http://lucyconfigserver:8888
-      # SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
-      # SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      SPRING_CLOUD_CONFIG_ENABLED: 'true'
+      SPRING_CONFIG_IMPORT: configserver:http://lucyconfigserver:8888
+      SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
+      SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
     ports:
       - 8080:8080
     networks:
