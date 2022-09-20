@@ -1,0 +1,10 @@
+server:
+  port: 8888
+
+# spring.security.user.name
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          cloneOnStart: true

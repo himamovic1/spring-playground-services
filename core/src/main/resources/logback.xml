@@ -13,16 +13,17 @@
         </layout>
     </appender>-->
 
-    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <param name="Encoding" value="UTF-8"/>
-        <destination>${LOGSTASH_DESTINATION}</destination>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"app_name":"lucy-core"}</customFields>
-        </encoder>
-    </appender>
+    <springProfile name="dev,prod">
+        <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <param name="Encoding" value="UTF-8"/>
+            <destination>${LOGSTASH_URI}</destination>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"app_name":"lucy-core"}</customFields>
+            </encoder>
+        </appender>
 
-    <logger name="com.lucy.core" level="info">
-        <appender-ref ref="logstash"/>
-    </logger>
-
+        <logger name="com.lucy.core" level="info">
+            <appender-ref ref="logstash"/>
+        </logger>
+    </springProfile>
 </configuration>

@@ -2,7 +2,7 @@ version: '3.7'
 
 networks:
   lucynet:
-    driver: bridge
+
 
 volumes:
   setup:
@@ -12,7 +12,7 @@ volumes:
 
 services:
 
-  # lucy config server
+  # Config Server
   lucyconfigserver:
     build:
       context: config-server/
@@ -20,8 +20,21 @@ services:
         CONFIG_USER: ${CONFIG_USER:-}
         CONFIG_PASS: ${CONFIG_PASS:-}
         CONFIG_GIT_REPO: ${CONFIG_GIT_REPO:-}
+    environment:
+      SPRING_SECURITY_USER_NAME: ${CONFIG_USER:-}
+      SPRING_SECURITY_USER_PASSWORD: ${CONFIG_PASS:-}
+      SPRING_CLOUD_CONFIG_SERVER_GIT_URI: ${CONFIG_GIT_REPO:-}
     ports:
       - 8888:8888
+    networks:
+      - lucynet
+
+  # Eureka server
+  lucyserviceregistry:
+    build:
+      context: service-registry/
+    ports:
+      - 8761:8761
     networks:
       - lucynet
 
@@ -29,8 +42,19 @@ services:
   lucycore:
     build:
       context: core/
-      args:
-        LOGSTASH_PATH: logstash:50000
+    restart: on-failure
+    depends_on:
+      - lucyconfigserver
+      - lucyserviceregistry
+      - logstash
+    environment:
+      EUREKA_URI: ${EUREKA_URI:-}
+      LOGSTASH_URI: ${LOGSTASH_URI:-}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      SPRING_CLOUD_CONFIG_ENABLED: 'true'
+      SPRING_CONFIG_IMPORT: configserver:http://lucyconfigserver:8888
+      SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
+      SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
     ports:
       - 8080:8080
     networks:
@@ -39,7 +63,7 @@ services:
   # This task is only performed during the *initial* startup of the stack. On all
   # subsequent runs, the service simply returns immediately, without performing
   # any modification to existing users.
-  setup:
+  elksetup:
     build:
       context: elk/setup/
       args:

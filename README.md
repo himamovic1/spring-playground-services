@@ -12,8 +12,11 @@ Repository to store all services related to this hoppy project
 | KIBANA_SYSTEM_PASSWORD     | The user Kibana uses to connect and communicate with Elasticsearch. |
 
 ## Environment variables
-| Var                        | Service       | Comment                                                             |
-| -------------------------- | ------------- | ------------------------------------------------------------------- |
-| CONFIG_USER                | *             | Basic auth user for interaction with config server                  |
-| CONFIG_PASS                | *             | Basic auth pass for interaction with config server                  |
-| CONFIG_GIT_REPO            | config-server | URL to git repo where config files are placed                       |
+| Var                    | Service                 | Comment                                            |
+| ---------------------- | ----------------------- | -------------------------------------------------- |
+| SPRING_PROFILES_ACTIVE | *                       | Determines environment in which the app is run     |
+| EUREKA_URI             | * (except conf. server) | Points to service registry instance                |
+| LOGSTASH_URI           | * (except eureka)       | Points to logstash instance                        |
+| CONFIG_USER            | *                       | Basic auth user for interaction with config server |
+| CONFIG_PASS            | *                       | Basic auth pass for interaction with config server |
+| CONFIG_GIT_REPO        | config-server           | URL to git repo where config files are placed      |

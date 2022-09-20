@@ -1,0 +1,5 @@
+// Multi-project setup
+rootProject.name = 'spring-playground'
+include 'config-server'
+include 'service-registry'
+include 'core'
