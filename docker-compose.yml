@@ -3,6 +3,7 @@ version: '3.7'
 networks:
   lucynet:
 
+
 volumes:
   setup:
     driver: local
@@ -11,15 +12,7 @@ volumes:
 
 services:
 
-  lucyserviceregistry:
-    build:
-      context: service-registry/
-    ports:
-      - 8761:8761
-    networks:
-      - lucynet
-
-  # lucy config server
+  # Config Server
   lucyconfigserver:
     build:
       context: config-server/
@@ -29,6 +22,15 @@ services:
         CONFIG_GIT_REPO: ${CONFIG_GIT_REPO:-}
     ports:
       - 8888:8888
+    networks:
+      - lucynet
+
+  # Eureka server
+  lucyserviceregistry:
+    build:
+      context: service-registry/
+    ports:
+      - 8761:8761
     networks:
       - lucynet
 
@@ -56,7 +58,7 @@ services:
   # This task is only performed during the *initial* startup of the stack. On all
   # subsequent runs, the service simply returns immediately, without performing
   # any modification to existing users.
-  setup:
+  elksetup:
     build:
       context: elk/setup/
       args:
