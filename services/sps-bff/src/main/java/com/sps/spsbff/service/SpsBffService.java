@@ -1,23 +1,36 @@
 package com.sps.spsbff.service;
 
+import com.sps.spsbff.clients.spstransactions.ISpsTransactionsClient;
 import com.sps.spsbff.models.AccountTransactionsResponse;
 import com.sps.spsbff.models.Transaction;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class SpsBffService implements ISpsBffService {
 
+    private final ISpsTransactionsClient transactionsClient;
+
+    public SpsBffService(ISpsTransactionsClient transactionsClient) {
+        this.transactionsClient = transactionsClient;
+    }
+
+
     @Override
     public AccountTransactionsResponse GetAccountTransactions(UUID accountId) {
-        var trx1 = new Transaction(UUID.randomUUID(), accountId, 10.9);
-        var trx2 = new Transaction(UUID.randomUUID(), accountId, 20.9);
-        var trx3 = new Transaction(UUID.randomUUID(), accountId, 30.9);
+        var transactions = transactionsClient.getTransactions();
+
+        // Map to API models
+        var apiTransactions = Optional.ofNullable(transactions)
+            .orElse(Collections.emptyList()).stream()
+            .map(t -> new Transaction(t.getId(), t.getIban(), t.getAmount()))
+            .toList();
 
         var response = new AccountTransactionsResponse();
-        response.setTransactions(List.of(trx1, trx2, trx3));
+        response.setTransactions(apiTransactions);
         response.setAccountId(accountId);
 
         return response;

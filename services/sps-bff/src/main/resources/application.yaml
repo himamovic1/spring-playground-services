@@ -19,3 +19,18 @@ eureka:
       defaultZone: ${EUREKA_URI}
   instance:
     preferIpAddress: true
+
+# Feign clients config properties
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 2000
+        readTimeout: 2000
+        loggerLevel: basic
+
+# Logging level config properties
+logging:
+  level:
+    com.sps.spsbff: INFO
+    com.sps.spsbff.clients: DEBUG

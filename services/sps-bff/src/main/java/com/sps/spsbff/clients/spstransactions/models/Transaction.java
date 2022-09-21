@@ -1,4 +1,4 @@
-package com.sps.spstransactions.models;
+package com.sps.spsbff.clients.spstransactions.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

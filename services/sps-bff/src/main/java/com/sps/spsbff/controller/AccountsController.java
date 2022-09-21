@@ -21,7 +21,7 @@ public class AccountsController {
 
 
     @GetMapping("/accounts/{accountId}/transactions")
-    public AccountTransactionsResponse GetAccountTransaction(@PathVariable UUID accountId) {
+    public AccountTransactionsResponse getAccountTransaction(@PathVariable UUID accountId) {
         log.info("Fetching account transactions for account id [{}]", accountId);
         return bffService.GetAccountTransactions(accountId);
     }

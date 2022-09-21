@@ -9,6 +9,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Transaction {
     private UUID id;
-    private UUID accountId;
+    private String iban;
     private Double amount;
 }
