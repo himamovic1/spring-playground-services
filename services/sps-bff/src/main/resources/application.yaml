@@ -1,0 +1,21 @@
+server:
+  port: 18000
+
+spring:
+  application:
+    name: sps-bff
+  cloud:
+    config:
+      enabled: false
+      failFast: true
+
+# Eureka config properties
+eureka:
+  client:
+    enabled: true
+    registerWithEureka: true
+    registryFetchIntervalSeconds: 10
+    serviceUrl:
+      defaultZone: ${EUREKA_URI}
+  instance:
+    preferIpAddress: true
