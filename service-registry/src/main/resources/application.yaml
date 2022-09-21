@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: lucy-service-registry
+    name: sps-service-registry
 
 # Eureka config properties
 eureka:

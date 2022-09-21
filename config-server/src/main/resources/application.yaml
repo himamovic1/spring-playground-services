@@ -3,6 +3,8 @@ server:
 
 # spring.security.user.name
 spring:
+  application:
+    name: sps-config-server
   cloud:
     config:
       server:

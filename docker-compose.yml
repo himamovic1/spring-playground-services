@@ -1,7 +1,7 @@
 version: '3.7'
 
 networks:
-  lucynet:
+  spsnet:
 
 
 volumes:
@@ -13,7 +13,7 @@ volumes:
 services:
 
   # Config Server
-  lucyconfigserver:
+  sps-config-server:
     build:
       context: config-server/
       args:
@@ -27,16 +27,16 @@ services:
     ports:
       - 8888:8888
     networks:
-      - lucynet
+      - spsnet
 
   # Eureka server
-  lucyserviceregistry:
+  sps-service-registry:
     build:
       context: service-registry/
     ports:
       - 8761:8761
     networks:
-      - lucynet
+      - spsnet
 
   # lucy-core
   lucycore:
@@ -44,21 +44,21 @@ services:
       context: core/
     restart: on-failure
     depends_on:
-      - lucyconfigserver
-      - lucyserviceregistry
+      - sps-config-server
+      - sps-service-registry
       - logstash
     environment:
       EUREKA_URI: ${EUREKA_URI:-}
       LOGSTASH_URI: ${LOGSTASH_URI:-}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_CLOUD_CONFIG_ENABLED: 'true'
-      SPRING_CONFIG_IMPORT: configserver:http://lucyconfigserver:8888
+      SPRING_CONFIG_IMPORT: configserver:http://sps-config-server:8888
       SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
       SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
     ports:
       - 8080:8080
     networks:
-      - lucynet
+      - spsnet
 
   # This task is only performed during the *initial* startup of the stack. On all
   # subsequent runs, the service simply returns immediately, without performing
@@ -76,7 +76,7 @@ services:
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
-      - lucynet
+      - spsnet
     depends_on:
       - elasticsearch
 
@@ -102,7 +102,7 @@ services:
       # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
     networks:
-      - lucynet
+      - spsnet
 
   logstash:
     build:
@@ -121,7 +121,7 @@ services:
       LS_JAVA_OPTS: -Xms256m -Xmx256m
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
     networks:
-      - lucynet
+      - spsnet
     depends_on:
       - elasticsearch
 
@@ -137,6 +137,6 @@ services:
     environment:
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
-      - lucynet
+      - spsnet
     depends_on:
       - elasticsearch
