@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "sps-accounts-client", url = "spsaccounts:18081")
+@FeignClient(name = "sps-accounts")
 public interface ISpsAccountsClient {
 
     @RequestMapping(

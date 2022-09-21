@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
 
-@FeignClient(name = "sps-transactions-client", url = "sps-transactions:18080")
+@FeignClient(name = "sps-transactions")
 public interface ISpsTransactionsClient {
 
     @RequestMapping(

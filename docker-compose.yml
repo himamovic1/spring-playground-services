@@ -38,10 +38,10 @@ services:
     networks:
       - spsnet
 
-  # lucy-core
-  lucycore:
+  # Business logic services
+  sps-bff-service:
     build:
-      context: core/
+      context: services/sps-bff/
     restart: on-failure
     depends_on:
       - sps-config-server
@@ -56,7 +56,49 @@ services:
       SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
       SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
     ports:
-      - 8080:8080
+      - 18000:18000
+    networks:
+      - spsnet
+
+  sps-accounts-service:
+    build:
+      context: services/sps-accounts/
+    restart: on-failure
+    depends_on:
+      - sps-config-server
+      - sps-service-registry
+      - logstash
+    environment:
+      EUREKA_URI: ${EUREKA_URI:-}
+      LOGSTASH_URI: ${LOGSTASH_URI:-}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      SPRING_CLOUD_CONFIG_ENABLED: 'true'
+      SPRING_CONFIG_IMPORT: configserver:http://sps-config-server:8888
+      SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
+      SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
+    ports:
+      - 18081:18081
+    networks:
+      - spsnet
+
+  sps-transactions-service:
+    build:
+      context: services/sps-transactions/
+    restart: on-failure
+    depends_on:
+      - sps-config-server
+      - sps-service-registry
+      - logstash
+    environment:
+      EUREKA_URI: ${EUREKA_URI:-}
+      LOGSTASH_URI: ${LOGSTASH_URI:-}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      SPRING_CLOUD_CONFIG_ENABLED: 'true'
+      SPRING_CONFIG_IMPORT: configserver:http://sps-config-server:8888
+      SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
+      SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
+    ports:
+      - 18080:18080
     networks:
       - spsnet
 
