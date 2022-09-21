@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+
+<configuration scan="true">
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <springProfile name="dev,prod">
+        <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <param name="Encoding" value="UTF-8"/>
+            <destination>${LOGSTASH_URI}</destination>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"app_name":"sps-transactions"}</customFields>
+            </encoder>
+        </appender>
+
+        <logger name="com.sps.spstransactions" level="info">
+            <appender-ref ref="logstash"/>
+        </logger>
+    </springProfile>
+</configuration>
