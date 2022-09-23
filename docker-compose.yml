@@ -14,6 +14,9 @@ services:
 
   # Config Server
   sps-config-server:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: config-server/
       args:
@@ -31,6 +34,9 @@ services:
 
   # Eureka server
   sps-service-registry:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: service-registry/
     ports:
@@ -40,6 +46,9 @@ services:
 
   # Business logic services
   sps-bff-service:
+    profiles:
+      - sps
+      - business
     build:
       context: services/sps-bff/
     restart: on-failure
@@ -61,6 +70,9 @@ services:
       - spsnet
 
   sps-accounts-service:
+    profiles:
+      - sps
+      - business
     build:
       context: services/sps-accounts/
     restart: on-failure
@@ -82,6 +94,9 @@ services:
       - spsnet
 
   sps-transactions-service:
+    profiles:
+      - sps
+      - business
     build:
       context: services/sps-transactions/
     restart: on-failure
@@ -106,6 +121,9 @@ services:
   # subsequent runs, the service simply returns immediately, without performing
   # any modification to existing users.
   elksetup:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: elk/setup/
       args:
@@ -123,6 +141,9 @@ services:
       - elasticsearch
 
   elasticsearch:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: elk/elasticsearch/
       args:
@@ -147,6 +168,9 @@ services:
       - spsnet
 
   logstash:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: elk/logstash/
       args:
@@ -168,6 +192,9 @@ services:
       - elasticsearch
 
   kibana:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: elk/kibana/
       args:
