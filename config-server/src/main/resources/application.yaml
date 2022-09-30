@@ -1,12 +1,25 @@
 server:
   port: 8888
 
-# spring.security.user.name
 spring:
-  application:
-    name: sps-config-server
+  profiles:
+    active: git, vault
+  # spring.security.user.name
+  # spring.security.user.password
   cloud:
     config:
       server:
+        vault:
+          # spring.cloud.config.server.vault.uri
+          # spring.cloud.config.server.vault.scheme
+          # spring.cloud.config.server.vault.host
+          # spring.cloud.config.server.vault.port
+          # spring.cloud.config.server.vault.token
+          order: 1
+          kv-version: 1
+          scheme: http
+          authentication: token
+          skip-ssl-validation: true
         git:
+          order: 2
           cloneOnStart: true

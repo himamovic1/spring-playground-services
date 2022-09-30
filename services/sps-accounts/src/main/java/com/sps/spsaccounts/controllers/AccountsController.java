@@ -3,6 +3,7 @@ package com.sps.spsaccounts.controllers;
 import com.sps.spsaccounts.models.Account;
 import com.sps.spsaccounts.models.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,8 +15,13 @@ import java.util.UUID;
 @RestController
 public class AccountsController {
 
+    @Value("vaulttestvariable")
+    private String vaultMessage;
+
+
     @GetMapping("/accounts")
     public List<Account> GetAccounts() {
+        log.info("Connection to vault: [{}]", vaultMessage);
         log.info("Fetching all accounts");
 
         var user1 = new User(UUID.randomUUID(), "John", "Doe");
@@ -29,6 +35,7 @@ public class AccountsController {
 
     @GetMapping("/accounts/{accountId}")
     public Account GetAccountById(@PathVariable UUID accountId) {
+        log.info("Connection to vault: [{}]", vaultMessage);
         log.info("Fetching a single account by id [{}]", accountId);
 
         var user = new User(UUID.randomUUID(), "John", "Doe");

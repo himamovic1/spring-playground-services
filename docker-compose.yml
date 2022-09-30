@@ -12,6 +12,38 @@ volumes:
 
 services:
 
+  # Hashicorp Vault
+  sps-vault:
+    profiles:
+      - sps
+      - infrastructure
+    image: vault:latest
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_TOKEN: ${VAULT_DEV_ROOT_TOKEN_ID}
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+    ports:
+      - 8200:8200
+
+  sps-vault-setup:
+    profiles:
+      - sps
+      - infrastructure
+    image: vault:latest
+    entrypoint: /bin/sh
+    volumes:
+      - './vault:/vault-source'
+    environment:
+      VAULT_ADDR: 'http://sps-vault:8200'
+      VAULT_SOURCE_DIR: '/vault-source'
+      VAULT_TOKEN: ${VAULT_DEV_ROOT_TOKEN_ID}
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+    command: >
+      -c " sleep 2; /vault-source/vault-init.sh; "
+    depends_on:
+      - sps-vault
+
   # Config Server
   sps-config-server:
     profiles:
@@ -23,14 +55,21 @@ services:
         CONFIG_USER: ${CONFIG_USER:-}
         CONFIG_PASS: ${CONFIG_PASS:-}
         CONFIG_GIT_REPO: ${CONFIG_GIT_REPO:-}
+        CONFIG_VAULT_URI: 'http://sps-vault:8200'
+        CONFIG_VAULT_TOKEN: ${VAULT_DEV_ROOT_TOKEN_ID:-}
     environment:
       SPRING_SECURITY_USER_NAME: ${CONFIG_USER:-}
       SPRING_SECURITY_USER_PASSWORD: ${CONFIG_PASS:-}
       SPRING_CLOUD_CONFIG_SERVER_GIT_URI: ${CONFIG_GIT_REPO:-}
+      SPRING_CLOUD_CONFIG_SERVER_VAULT_URI: 'http://sps-vault:8200'
+      SPRING_CLOUD_CONFIG_SERVER_VAULT_HOST: 'sps-vault'
+      SPRING_CLOUD_CONFIG_SERVER_VAULT_TOKEN: ${VAULT_DEV_ROOT_TOKEN_ID:-}
     ports:
       - 8888:8888
     networks:
       - spsnet
+    depends_on:
+      - sps-vault
 
   # Eureka server
   sps-service-registry:
