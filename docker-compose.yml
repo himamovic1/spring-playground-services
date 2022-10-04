@@ -9,8 +9,43 @@ volumes:
     driver: local
   elasticsearch:
     driver: local
+  sps-pg-main:
+    driver: local
+  sps-pg-pgadmin:
+    driver: local
 
 services:
+
+  # Postgres
+  sps-pg-main:
+    profiles:
+      - sps
+      - infrastructure
+    image: postgres:latest
+    volumes:
+      - sps-pg-main:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    networks:
+      - spsnet
+
+  sps-pg-pgadmin:
+    profiles:
+      - sps
+      - infrastructure
+    image: dpage/pgadmin4
+    volumes:
+      - sps-pg-pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5430:80"
+    networks:
+      - spsnet
 
   # Hashicorp Vault
   sps-vault:
