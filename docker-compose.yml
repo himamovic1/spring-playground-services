@@ -1,7 +1,7 @@
 version: '3.7'
 
 networks:
-  lucynet:
+  spsnet:
 
 
 volumes:
@@ -12,58 +12,161 @@ volumes:
 
 services:
 
+  # Hashicorp Vault
+  sps-vault:
+    profiles:
+      - sps
+      - infrastructure
+    image: vault:latest
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_TOKEN: ${VAULT_DEV_ROOT_TOKEN_ID}
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+    ports:
+      - 8200:8200
+    networks:
+      - spsnet
+
+  sps-vault-setup:
+    profiles:
+      - sps
+      - infrastructure
+    image: vault:latest
+    entrypoint: /bin/sh
+    volumes:
+      - './vault:/vault-source'
+    environment:
+      VAULT_ADDR: 'http://sps-vault:8200'
+      VAULT_SOURCE_DIR: '/vault-source'
+      VAULT_TOKEN: ${VAULT_DEV_ROOT_TOKEN_ID}
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+    command: >
+      -c " sleep 2; /vault-source/vault-init.sh; "
+    networks:
+      - spsnet
+    depends_on:
+      - sps-vault
+
   # Config Server
-  lucyconfigserver:
+  sps-config-server:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: config-server/
       args:
         CONFIG_USER: ${CONFIG_USER:-}
         CONFIG_PASS: ${CONFIG_PASS:-}
         CONFIG_GIT_REPO: ${CONFIG_GIT_REPO:-}
+        CONFIG_VAULT_URI: 'http://sps-vault:8200'
+        CONFIG_VAULT_TOKEN: ${VAULT_DEV_ROOT_TOKEN_ID:-}
     environment:
       SPRING_SECURITY_USER_NAME: ${CONFIG_USER:-}
       SPRING_SECURITY_USER_PASSWORD: ${CONFIG_PASS:-}
       SPRING_CLOUD_CONFIG_SERVER_GIT_URI: ${CONFIG_GIT_REPO:-}
+      SPRING_CLOUD_CONFIG_SERVER_VAULT_URI: 'http://sps-vault:8200'
+      SPRING_CLOUD_CONFIG_SERVER_VAULT_HOST: 'sps-vault'
+      SPRING_CLOUD_CONFIG_SERVER_VAULT_TOKEN: ${VAULT_DEV_ROOT_TOKEN_ID:-}
     ports:
       - 8888:8888
     networks:
-      - lucynet
+      - spsnet
+    depends_on:
+      - sps-vault
 
   # Eureka server
-  lucyserviceregistry:
+  sps-service-registry:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: service-registry/
     ports:
       - 8761:8761
     networks:
-      - lucynet
+      - spsnet
 
-  # lucy-core
-  lucycore:
+  # Business logic services
+  sps-bff-service:
+    profiles:
+      - sps
+      - business
     build:
-      context: core/
+      context: services/sps-bff/
     restart: on-failure
     depends_on:
-      - lucyconfigserver
-      - lucyserviceregistry
+      - sps-config-server
+      - sps-service-registry
       - logstash
     environment:
       EUREKA_URI: ${EUREKA_URI:-}
       LOGSTASH_URI: ${LOGSTASH_URI:-}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_CLOUD_CONFIG_ENABLED: 'true'
-      SPRING_CONFIG_IMPORT: configserver:http://lucyconfigserver:8888
+      SPRING_CONFIG_IMPORT: configserver:http://sps-config-server:8888
       SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
       SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
     ports:
-      - 8080:8080
+      - 18000:18000
     networks:
-      - lucynet
+      - spsnet
+
+  sps-accounts-service:
+    profiles:
+      - sps
+      - business
+    build:
+      context: services/sps-accounts/
+    restart: on-failure
+    depends_on:
+      - sps-config-server
+      - sps-service-registry
+      - logstash
+    environment:
+      EUREKA_URI: ${EUREKA_URI:-}
+      LOGSTASH_URI: ${LOGSTASH_URI:-}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      SPRING_CLOUD_CONFIG_ENABLED: 'true'
+      SPRING_CONFIG_IMPORT: configserver:http://sps-config-server:8888
+      SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
+      SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
+    ports:
+      - 18081:18081
+    networks:
+      - spsnet
+
+  sps-transactions-service:
+    profiles:
+      - sps
+      - business
+    build:
+      context: services/sps-transactions/
+    restart: on-failure
+    depends_on:
+      - sps-config-server
+      - sps-service-registry
+      - logstash
+    environment:
+      EUREKA_URI: ${EUREKA_URI:-}
+      LOGSTASH_URI: ${LOGSTASH_URI:-}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      SPRING_CLOUD_CONFIG_ENABLED: 'true'
+      SPRING_CONFIG_IMPORT: configserver:http://sps-config-server:8888
+      SPRING_CLOUD_CONFIG_USERNAME: ${CONFIG_USER:-}
+      SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASS:-}
+    ports:
+      - 18080:18080
+    networks:
+      - spsnet
 
   # This task is only performed during the *initial* startup of the stack. On all
   # subsequent runs, the service simply returns immediately, without performing
   # any modification to existing users.
   elksetup:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: elk/setup/
       args:
@@ -76,11 +179,14 @@ services:
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
-      - lucynet
+      - spsnet
     depends_on:
       - elasticsearch
 
   elasticsearch:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: elk/elasticsearch/
       args:
@@ -102,9 +208,12 @@ services:
       # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
     networks:
-      - lucynet
+      - spsnet
 
   logstash:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: elk/logstash/
       args:
@@ -121,11 +230,14 @@ services:
       LS_JAVA_OPTS: -Xms256m -Xmx256m
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
     networks:
-      - lucynet
+      - spsnet
     depends_on:
       - elasticsearch
 
   kibana:
+    profiles:
+      - sps
+      - infrastructure
     build:
       context: elk/kibana/
       args:
@@ -137,6 +249,6 @@ services:
     environment:
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
-      - lucynet
+      - spsnet
     depends_on:
       - elasticsearch

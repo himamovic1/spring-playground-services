@@ -1,6 +1,11 @@
 # spring-playground-services
 Repository to store all services related to this hoppy project
 
+## Running the services
+Steps to run infrastructure services first (eg. config server, kibana etc.) and then run the other app services.
+1. `docker-compose --profile infrastructure up -d --build`
+2. `docker-compose --profile sps up -d --build`
+
 ## Environment variables
 | Var                        | Comment                                                             |
 | -------------------------- | ------------------------------------------------------------------- |

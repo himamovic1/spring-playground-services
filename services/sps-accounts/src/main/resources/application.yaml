@@ -1,0 +1,21 @@
+server:
+  port: 18081
+
+spring:
+  application:
+    name: sps-accounts
+  cloud:
+    config:
+      enabled: false
+      failFast: true
+
+# Eureka config properties
+eureka:
+  client:
+    enabled: true
+    registerWithEureka: true
+    registryFetchIntervalSeconds: 10
+    serviceUrl:
+      defaultZone: ${EUREKA_URI}
+  instance:
+    preferIpAddress: true
