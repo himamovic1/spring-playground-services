@@ -25,6 +25,8 @@ services:
       VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
     ports:
       - 8200:8200
+    networks:
+      - spsnet
 
   sps-vault-setup:
     profiles:
@@ -41,6 +43,8 @@ services:
       VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
     command: >
       -c " sleep 2; /vault-source/vault-init.sh; "
+    networks:
+      - spsnet
     depends_on:
       - sps-vault
 
