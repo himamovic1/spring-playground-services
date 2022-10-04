@@ -30,7 +30,7 @@ services:
       - "5432:5432"
     networks:
       - spsnet
-  
+
   sps-pg-pgadmin:
     profiles:
       - sps
